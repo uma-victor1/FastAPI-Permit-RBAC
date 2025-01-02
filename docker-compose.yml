@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  server:
+    restart: unless-stopped
+    environment:
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - HASH_SALT=${HASH_SALT}
+    build: .
+    ports:
+      - "3000:3000"
+
+  example_2:
+    container_name: example_2
+    restart: unless-stopped
+    network_mode: "host"
+    build: .
