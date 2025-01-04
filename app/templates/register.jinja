@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+
+    <!-- Display any messages or errors here -->
+    {% if message %}
+        <p style="color:red;">{{ message }}</p>
+    {% endif %}
+
+    <form action="/auth/register" method="post">
+        <div>
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="surname">Surname:</label><br>
+            <input type="text" id="surname" name="surname" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <br>
+
+        <div>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" minlength="4" required>
+        </div>
+        <br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p>
+        <a href="/">Back to Home</a>
+    </p>
+</body>
+</html>

@@ -7,6 +7,7 @@ from sqlalchemy import String
 from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.orm import relationship
 
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -25,28 +26,30 @@ class User(Base):
     updated_at = Column("updated_at", DateTime(), default=current_timestamp())
     created_at = Column("created_at", DateTime(), default=current_timestamp())
 
+    contacts = relationship(
+        "Contact", back_populates="user", cascade="all, delete-orphan"
+    )
+
     class Role:
         ADMIN = "admin"
         USER = "user"
         GUEST = "guest"
 
-
-# one to one relationship
-class TaxAccount(Base):
-    __tablename__ = "tax_accounts"
-    id = Column("id", Integer, ForeignKey("users.id"), index=True, primary_key=True)
-    rate = Column("rate", Float(precision=2))
-    updated_at = Column("updated_at", DateTime(), default=current_timestamp())
-    created_at = Column("created_at", DateTime(), default=current_timestamp())
+    def to_dict(self):
+        return {key: getattr(self, key) for key in self.__table__.columns.keys()}
 
 
-# one to many relationship
-class Salary(Base):
-    __tablename__ = "salaries"
+class Contact(Base):
+    __tablename__ = "contacts"
+
     id = Column("id", Integer(), primary_key=True, autoincrement=True)
-    user_id = Column("user_id", Integer(), ForeignKey("users.id"))
-    amount = Column("amount", Float(precision=2))
-    amount_hours = Column("amount_hours", Float(precision=1))
-    salary_date = Column("salary_date", DateTime())
+    user_id = Column("user_id", Integer(), ForeignKey("users.id"), nullable=False)
+    name = Column("name", String(128), nullable=False)
+    phone = Column("phone", String(32), nullable=True)
+    email = Column("email", String(256), nullable=True)
+    notes = Column("notes", String(512), nullable=True)
     updated_at = Column("updated_at", DateTime(), default=current_timestamp())
     created_at = Column("created_at", DateTime(), default=current_timestamp())
+
+    # Relationship back to the User model
+    user = relationship("User", back_populates="contacts")

@@ -6,4 +6,4 @@ DB_CONNECTION_STRING = getenv("DB_CONNECTION_STRING")
 COOKIES_KEY_NAME = "session_token"
 SESSION_TIME = timedelta(days=30)
 HASH_SALT = getenv("HASH_SALT", "SomeRandomStringHere")
-SECRET_KEY = getenv("SECRET_KEY")
+SECRET_KEY = getenv("SECRET_KEY", "secret")

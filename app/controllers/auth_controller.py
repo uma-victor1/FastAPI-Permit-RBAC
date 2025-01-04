@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from fastapi import HTTPException
 from fastapi import status
 from fastapi import Response, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.requests import Request
 
 from utils import formating
@@ -25,9 +25,16 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 @router.post(
     "/register", status_code=status.HTTP_201_CREATED, response_model=dto.GetUser
 )
-async def register(user: dto.CreateUser):
+async def register(
+    res: Response,
+    email: str = Form(...),
+    password: str = Form(...),
+    name: str = Form(...),
+    surname: str = Form(...),
+):
+    user = dto.CreateUser(name=name, surname=surname, email=email, password=password)
     email = formating.format_string(user.email)
-
+    NOW = datetime.now(timezone.utc)
     if not email:
         raise HTTPException(
             detail="Email can not be empty",
@@ -47,28 +54,40 @@ async def register(user: dto.CreateUser):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
 
-    return user_service.create(
+    created_user = user_service.create(
         user.name, user.surname, db.User.Role.USER, email, user.password
     )
+    created_user_dict = created_user.to_dict()
+    print(created_user_dict)
+
+    exp_date = NOW + SESSION_TIME
+
+    token = jwt_service.encode(
+        created_user_dict["id"], str(created_user_dict["role"]), exp_date
+    )
+    res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
+    print(token)
+    return RedirectResponse(url="/")
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=str)
 async def login(res: Response, email: str = Form(...), password: str = Form(...)):
+    oldUser = dto.LoginUser(email=email, password=password)
     NOW = datetime.now(timezone.utc)
 
-    email = formating.format_string(email)
+    email = formating.format_string(oldUser.email)
 
     user = user_service.get_by_email(email)
     if user is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
 
-    if HashLib.validate(password, user.password) is False:
+    if HashLib.validate(oldUser.password, user.password) is False:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect password")
 
     exp_date = NOW + SESSION_TIME
     token = jwt_service.encode(user.id, user.role, exp_date)
     res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
-    return token
+    return RedirectResponse(url="/")
 
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)

@@ -4,9 +4,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from models import db
-from utils.dependencies import user_dependency, get_user
+from utils.dependencies import get_user
 from fastapi.responses import RedirectResponse
-
 
 router = APIRouter(prefix="", tags=["Pages"], default_response_class=HTMLResponse)
 
@@ -39,3 +38,11 @@ def login(req: Request, res: Response, user: db.User = Depends(get_user)):
         return RedirectResponse(url="/")
 
     return templates.TemplateResponse("login.jinja", {"request": req, "message": ""})
+
+
+@router.get("/auth/register")
+def register(req: Request, res: Response, user: db.User = Depends(get_user)):
+    if user is not None:
+        return RedirectResponse(url="/")
+
+    return templates.TemplateResponse("register.jinja", {"request": req, "message": ""})

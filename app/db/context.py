@@ -10,10 +10,13 @@ from constants import DB_CONNECTION_STRING
 
 
 if not DB_CONNECTION_STRING:
-    raise Exception("DB connection string not providet")
+    raise Exception("DB connection string not provided")
 
-engine = create_engine(DB_CONNECTION_STRING, echo=False, pool_pre_ping=True, pool_recycle=3600) #reconect after 1 hour
+engine = create_engine(
+    DB_CONNECTION_STRING, echo=False, pool_pre_ping=True, pool_recycle=3600
+)  # reconect after 1 hour
 session_maker = sessionmaker(bind=engine, expire_on_commit=False)
+
 
 def create_db() -> None:
     """
@@ -28,7 +31,7 @@ def get_db() -> Generator[Session, Any, None]:
     """
     with session_maker() as session:
         yield session
-        
+
 
 def auto_create_db():
     """
