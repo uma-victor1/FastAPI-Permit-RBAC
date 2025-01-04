@@ -4,9 +4,9 @@ import jwt
 
 from models import db
 from models import dto
+from constants import SECRET_KEY
 
 
-SECRET_KEY = "SomeRandomSalt"
 ALGORITHM = "HS256"
 
 

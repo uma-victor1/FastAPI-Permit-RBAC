@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+
+    <!-- Display any messages or errors here -->
+    {% if message %}
+        <p style="color:red;">{{ message }}</p>
+    {% endif %}
+
+    <form action="/auth/login" method="post">
+        <label for="email">Email:</label><br/>
+        <input type="email" id="email" name="email" required><br/><br/>
+
+        <label for="password">Password:</label><br/>
+        <input type="password" id="password" name="password" required><br/><br/>
+
+        <button type="submit">Log In</button>
+    </form>
+
+    <p>
+        <!-- Optional links -->
+        <a href="/">Back to Home</a>
+    </p>
+</body>
+</html>

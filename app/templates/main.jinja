@@ -3,16 +3,43 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main</title>
+    <title>Main Page</title>
 </head>
 
 <body>
-    <h1>Main page Jinja templating</h1>
-    <h3>Server time: {{date}}</h3>
-    <h3>
-        <a href="/docs">Swagger docs</a>
-    </h3>
-</body>
+    <h1>Main Page Jinja Templating</h1>
 
+    <section>
+        <!-- Display the server time -->
+        <p>Server time: {{ date }}</p>
+
+        <!-- Display user-specific info -->
+        {% if user %}
+            <p>Welcome, {{ user.name }} {{ user.surname }}!</p>
+            <p>Your role: {{ user.role }}</p>
+            <p>
+                <a href="/auth/logout">Logout</a>
+            </p>
+        {% else %}
+            <p>You are not logged in.</p>
+            <!-- Perhaps a link to login if you implement one -->
+            <p>
+                <a href="/auth/login">Login</a>
+            </p>
+        {% endif %}
+    </section>
+
+    <hr>
+
+    <section>
+        <h2>Additional Links</h2>
+        <ul>
+            <li>
+                <a href="/docs" target="_blank">Swagger Docs</a>
+            </li>
+            <!-- Add any other links you want here -->
+        </ul>
+    </section>
+
+</body>
 </html>
