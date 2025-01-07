@@ -19,7 +19,7 @@ def main(
     user: db.User = Depends(get_user),
 ):
     if user is None:
-        return RedirectResponse(url="/auth/login")
+        return RedirectResponse(url="/login")
 
     now = datetime.now()
     return templates.TemplateResponse(
@@ -32,7 +32,7 @@ def main(
     )
 
 
-@router.get("/auth/login")
+@router.get("/login")
 def login(req: Request, res: Response, user: db.User = Depends(get_user)):
     if user is not None:
         return RedirectResponse(url="/")

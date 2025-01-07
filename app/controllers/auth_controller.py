@@ -65,12 +65,22 @@ async def register(
     token = jwt_service.encode(
         created_user_dict["id"], str(created_user_dict["role"]), exp_date
     )
-    res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
-    print(token)
-    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    res.set_cookie(
+        key=COOKIES_KEY_NAME,
+        value=token,
+        expires=exp_date,
+        httponly=True,  # Recommended for security
+        secure=False,  # Set True in production (if using HTTPS)
+        samesite="Lax",
+    )
+
+    # redirect to home page
+    return RedirectResponse(
+        url="/", status_code=status.HTTP_303_SEE_OTHER, headers=res.headers
+    )
 
 
-@router.post("/login", status_code=status.HTTP_200_OK, response_model=str)
+@router.post("/login", status_code=status.HTTP_200_OK)
 async def login(res: Response, email: str = Form(...), password: str = Form(...)):
     oldUser = dto.LoginUser(email=email, password=password)
     NOW = datetime.now(timezone.utc)
@@ -86,13 +96,27 @@ async def login(res: Response, email: str = Form(...), password: str = Form(...)
 
     exp_date = NOW + SESSION_TIME
     token = jwt_service.encode(user.id, user.role, exp_date)
-    res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
-    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    res.set_cookie(
+        key=COOKIES_KEY_NAME,
+        value=token,
+        expires=exp_date,
+        httponly=True,  # Recommended for security
+        secure=False,  # Set True in production (if using HTTPS)
+        samesite="Lax",
+    )
+
+    # redirect to home page
+    return RedirectResponse(
+        url="/", status_code=status.HTTP_303_SEE_OTHER, headers=res.headers
+    )
 
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(res: Response) -> JSONResponse:
     res.delete_cookie(COOKIES_KEY_NAME)
+    return RedirectResponse(
+        url="/login", status_code=status.HTTP_303_SEE_OTHER, headers=res.headers
+    )
 
 
 @router.get("/validate", response_model=dto.Token)
