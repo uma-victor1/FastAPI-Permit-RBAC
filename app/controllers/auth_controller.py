@@ -67,7 +67,7 @@ async def register(
     )
     res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
     print(token)
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/login", status_code=status.HTTP_200_OK, response_model=str)
@@ -87,7 +87,7 @@ async def login(res: Response, email: str = Form(...), password: str = Form(...)
     exp_date = NOW + SESSION_TIME
     token = jwt_service.encode(user.id, user.role, exp_date)
     res.set_cookie(COOKIES_KEY_NAME, token, expires=exp_date)
-    return RedirectResponse(url="/")
+    return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/logout", status_code=status.HTTP_204_NO_CONTENT)
