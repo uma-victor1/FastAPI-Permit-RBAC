@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, Response, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from services import contact_service
 from models import db
 from utils.dependencies import get_user
 from fastapi.responses import RedirectResponse
@@ -20,14 +21,15 @@ def main(
 ):
     if user is None:
         return RedirectResponse(url="/login")
-
+    contacts = contact_service.get_all_contacts(user.id)
     now = datetime.now()
     return templates.TemplateResponse(
         "main.jinja",
         {
             "request": req,
             "date": now.replace(microsecond=0),
-            "user": user,  # Pass the user to the template if needed
+            "user": user,
+            "contacts": contacts,
         },
     )
 

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Body, Request
 from sqlalchemy.orm import Session
 from typing import List
 
 from services import contact_service
-from utils.dependencies import user_dependency
+from utils.dependencies import get_user
 from db.context import get_db
 from models.dto import CreateContact, UpdateContact, GetContact
 from models.db import User
@@ -11,14 +11,13 @@ from models.db import User
 router = APIRouter(prefix="/contacts", tags=["Contacts"])
 
 
-@router.post("/", response_model=GetContact, status_code=status.HTTP_201_CREATED)
-def create_contact(
-    contact_data: CreateContact,
-    db: Session = Depends(get_db),
-    user: User = Depends(user_dependency),
+@router.post("/add", status_code=status.HTTP_201_CREATED)
+async def create_contact(
+    contact_data: CreateContact = Body(...),
+    user: User = Depends(get_user),
 ):
     try:
-        return contact_service.create_contact(user.id, contact_data, db)
+        return contact_service.create_contact(user.id, contact_data)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -26,7 +25,7 @@ def create_contact(
 @router.get("/", response_model=List[GetContact])
 def get_all_contacts(
     db: Session = Depends(get_db),
-    user: User = Depends(user_dependency),
+    user: User = Depends(get_user),
 ):
     return contact_service.get_all_contacts(user.id, db)
 
@@ -35,7 +34,7 @@ def get_all_contacts(
 def get_contact_by_id(
     id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(user_dependency),
+    user: User = Depends(get_user),
 ):
     try:
         return contact_service.get_contact_by_id(id, user.id, db)
@@ -48,7 +47,7 @@ def update_contact(
     id: int,
     contact_data: UpdateContact,
     db: Session = Depends(get_db),
-    user: User = Depends(user_dependency),
+    user: User = Depends(get_user),
 ):
     try:
         return contact_service.update_contact(id, user.id, contact_data, db)
@@ -60,7 +59,7 @@ def update_contact(
 def delete_contact(
     id: int,
     db: Session = Depends(get_db),
-    user: User = Depends(user_dependency),
+    user: User = Depends(get_user),
 ):
     try:
         contact_service.delete_contact(id, user.id, db)

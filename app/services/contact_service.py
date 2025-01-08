@@ -4,19 +4,12 @@ from models.dto import CreateContact, UpdateContact
 from repos import contact_repo
 
 
-def create_contact(user_id: int, contact_data: CreateContact, db: Session) -> Contact:
-    new_contact = Contact(
-        user_id=user_id,
-        name=contact_data.name,
-        phone=contact_data.phone,
-        email=contact_data.email,
-        notes=contact_data.notes,
-    )
-    return contact_repo.add_contact(new_contact, db)
+def create_contact(user_id: int, contact_data: CreateContact) -> Contact:
+    return contact_repo.add(contact_data, user_id)
 
 
-def get_all_contacts(user_id: int, db: Session):
-    return contact_repo.get_contacts_by_user(user_id, db)
+def get_all_contacts(user_id: int):
+    return contact_repo.get_contacts_by_user(user_id)
 
 
 def get_contact_by_id(contact_id: int, user_id: int, db: Session) -> Contact:

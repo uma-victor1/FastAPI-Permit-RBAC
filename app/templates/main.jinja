@@ -1,45 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Main Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Contacts</title>
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>Main Page Jinja Templating</h1>
+    <h1>Welcome, {{ user.name }}</h1>
+    <h3>Your Contacts</h3>
 
-    <section>
-        <!-- Display the server time -->
-        <p>Server time: {{ date }}</p>
+    {% if contacts %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.name }}</td>
+                    <td>{{ contact.phone or 'N/A' }}</td>
+                    <td>{{ contact.email or 'N/A' }}</td>
+                    <td>{{ contact.notes or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have no contacts yet.</p>
+    {% endif %}
 
-        <!-- Display user-specific info -->
-        {% if user %}
-            <p>Welcome, {{ user.name }} {{ user.surname }}!</p>
-            <p>Your role: {{ user.role }}</p>
-            <p>
-                <a href="/auth/logout">Logout</a>
-            </p>
-        {% else %}
-            <p>You are not logged in.</p>
-            <!-- Perhaps a link to login if you implement one -->
-            <p>
-                <a href="/auth/login">Login</a>
-            </p>
-        {% endif %}
-    </section>
+    <!-- Add Contact Button -->
+    <button id="addContactBtn">Add New Contact</button>
 
-    <hr>
+    <!-- The Modal -->
+    <div id="addContactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Contact</h2>
+            <form id="addContactForm">
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name" required><br><br>
 
-    <section>
-        <h2>Additional Links</h2>
-        <ul>
-            <li>
-                <a href="/docs" target="_blank">Swagger Docs</a>
-            </li>
-            <!-- Add any other links you want here -->
-        </ul>
-    </section>
+                <label for="phone">Phone:</label><br>
+                <input type="text" id="phone" name="phone"><br><br>
 
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email"><br><br>
+
+                <label for="notes">Notes:</label><br>
+                <textarea id="notes" name="notes"></textarea><br><br>
+
+                <button type="submit">Add Contact</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get modal element and button
+        const modal = document.getElementById("addContactModal");
+        const btn = document.getElementById("addContactBtn");
+        const span = document.querySelector(".close");
+
+        // Open the modal when the button is clicked
+        btn.onclick = function () {
+            modal.style.display = "block";
+        };
+
+        // Close the modal when the close button is clicked
+        span.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        // Close the modal when clicking outside of it
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+    const form = document.getElementById('addContactForm');
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch('http://localhost:3000/contacts/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+            alert('Contact added successfully!');
+            location.reload(); // Reload the page or update the UI dynamically
+        } else {
+            const errorData = await response.json();
+            console.log(errorData)
+        }
+    });
+
+
+
+    </script>
 </body>
 </html>
