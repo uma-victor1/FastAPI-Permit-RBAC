@@ -52,7 +52,9 @@ def delete(contact_id: int, user_id: int) -> None:
     """
     with session_maker.begin() as session:
         session.execute(
-            Delete(Contact).where(Contact.id == contact_id, Contact.user_id == user_id)
+            Delete(Contact).where(
+                (Contact.id == contact_id) & (Contact.user_id == user_id)
+            )
         )
 
 

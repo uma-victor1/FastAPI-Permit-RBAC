@@ -11,7 +11,7 @@ from models.db import User
 router = APIRouter(prefix="/contacts", tags=["Contacts"])
 
 
-@router.post("/add", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_contact(
     contact_data: CreateContact = Body(...),
     user: User = Depends(get_user),
@@ -42,7 +42,7 @@ def get_contact_by_id(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
-@router.put("/{id}", response_model=GetContact)
+@router.put("/{id}")
 def update_contact(
     id: int,
     contact_data: UpdateContact,
@@ -50,7 +50,8 @@ def update_contact(
     user: User = Depends(get_user),
 ):
     try:
-        return contact_service.update_contact(id, user.id, contact_data, db)
+        contact_service.update_contact(id, user.id, contact_data)
+        return {"message": "Contact updated successfully"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
@@ -62,6 +63,6 @@ def delete_contact(
     user: User = Depends(get_user),
 ):
     try:
-        contact_service.delete_contact(id, user.id, db)
+        contact_service.delete_contact(id, user.id)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))

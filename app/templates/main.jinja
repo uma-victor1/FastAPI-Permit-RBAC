@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <style>
         /* Modal styles */
         .modal {
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -15,8 +17,10 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4); /* Black with opacity */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black with opacity */
         }
+
         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
@@ -25,62 +29,76 @@
             width: 50%;
             border-radius: 8px;
         }
+
         .close {
             color: #aaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
         }
+
         .close:hover,
         .close:focus {
             color: black;
             text-decoration: none;
             cursor: pointer;
         }
+
         table {
             border-collapse: collapse;
             width: 100%;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
         }
+
         th {
             background-color: #f2f2f2;
             text-align: left;
         }
+
         tr:hover {
             background-color: #f5f5f5;
         }
     </style>
 </head>
+
 <body>
     <h1>Welcome, {{ user.name }}</h1>
     <h3>Your Contacts</h3>
 
     {% if contacts %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Email</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for contact in contacts %}
-                <tr>
-                    <td>{{ contact.name }}</td>
-                    <td>{{ contact.phone or 'N/A' }}</td>
-                    <td>{{ contact.email or 'N/A' }}</td>
-                    <td>{{ contact.notes or 'N/A' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contact in contacts %}
+            <tr>
+                <td>{{ contact.name }}</td>
+                <td>{{ contact.phone or 'N/A' }}</td>
+                <td>{{ contact.email or 'N/A' }}</td>
+                <td>{{ contact.notes or 'N/A' }}</td>
+                <td>
+                    <button
+                        onclick="openUpdateModal({{ contact.id }}, '{{ contact.name }}', '{{ contact.phone }}', '{{ contact.email }}', '{{ contact.notes }}')">Edit</button>
+                    <button onclick="deleteContact({{ contact.id }})">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
-        <p>You have no contacts yet.</p>
+    <p>You have no contacts yet.</p>
     {% endif %}
 
     <!-- Add Contact Button -->
@@ -108,6 +126,29 @@
             </form>
         </div>
     </div>
+    <!-- update contact modal -->
+    <div id="updateContactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateModal()">&times;</span>
+            <h2>Update Contact</h2>
+            <form id="updateContactForm">
+                <input type="hidden" id="updateId">
+                <label for="updateName">Name:</label>
+                <input type="text" id="updateName" name="name" required><br><br>
+
+                <label for="updatePhone">Phone:</label>
+                <input type="text" id="updatePhone" name="phone"><br><br>
+
+                <label for="updateEmail">Email:</label>
+                <input type="email" id="updateEmail" name="email"><br><br>
+
+                <label for="updateNotes">Notes:</label>
+                <textarea id="updateNotes" name="notes"></textarea><br><br>
+
+                <button type="button" onclick="submitUpdate()">Update Contact</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         // Get modal element and button
@@ -131,32 +172,96 @@
                 modal.style.display = "none";
             }
         };
-    const form = document.getElementById('addContactForm');
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        const form = document.getElementById('addContactForm');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
 
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
 
-        const response = await fetch('http://localhost:3000/contacts/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
+            const response = await fetch('http://localhost:3000/contacts/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Contact added successfully!');
+                location.reload(); // Reload the page or update the UI dynamically
+            } else {
+                const errorData = await response.json();
+                console.log(errorData)
+            }
         });
 
-        if (response.ok) {
-            alert('Contact added successfully!');
-            location.reload(); // Reload the page or update the UI dynamically
-        } else {
-            const errorData = await response.json();
-            console.log(errorData)
+        /////////////////////////////////////////
+        ///// Update modal functionality ///////
+        ///////////////////////////////////////
+        // Open Update Modal
+        function openUpdateModal(id, name, phone, email, notes) {
+            document.getElementById('updateId').value = id;
+            document.getElementById('updateName').value = name;
+            document.getElementById('updatePhone').value = phone;
+            document.getElementById('updateEmail').value = email;
+            document.getElementById('updateNotes').value = notes;
+            document.getElementById('updateContactModal').style.display = 'block';
         }
-    });
 
+        // Close Update Modal
+        function closeUpdateModal() {
+            document.getElementById('updateContactModal').style.display = 'none';
+        }
 
+        // Submit Update Contact
+        async function submitUpdate() {
+            const id = document.getElementById('updateId').value;
+            const data = {
+                name: document.getElementById('updateName').value,
+                phone: document.getElementById('updatePhone').value,
+                email: document.getElementById('updateEmail').value,
+                notes: document.getElementById('updateNotes').value,
+            };
+
+            const response = await fetch(`/contacts/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                alert('Contact updated successfully!');
+                location.reload();
+            } else {
+                alert('Failed to update contact.');
+            }
+        }
+
+        // Delete Contact
+        async function deleteContact(id) {
+            if (!confirm('Are you sure you want to delete this contact?')) {
+                return;
+            }
+
+            const response = await fetch(`/contacts/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Contact deleted successfully!');
+                location.reload();
+            } else {
+                alert('Failed to delete contact.');
+            }
+        }
+        /////////////////////////////////////////
+        ///// Update modal functionality ///////
+        ///////////////////////////////////////
 
     </script>
 </body>
+
 </html>

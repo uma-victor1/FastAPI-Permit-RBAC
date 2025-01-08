@@ -20,9 +20,9 @@ def get_contact_by_id(contact_id: int, user_id: int, db: Session) -> Contact:
 
 
 def update_contact(
-    contact_id: int, user_id: int, contact_data: UpdateContact, db: Session
+    contact_id: int, user_id: int, contact_data: UpdateContact
 ) -> Contact:
-    contact = contact_repo.get_contact_by_id(contact_id, user_id, db)
+    contact = contact_repo.get_by_id(contact_id, user_id)
     if not contact:
         raise ValueError("Contact not found")
 
@@ -32,11 +32,13 @@ def update_contact(
     contact.email = contact_data.email or contact.email
     contact.notes = contact_data.notes or contact.notes
 
-    return contact_repo.update_contact(contact, db)
+    return contact_repo.update(
+        contact.id, user_id, contact.name, contact.phone, contact.email, contact.notes
+    )
 
 
-def delete_contact(contact_id: int, user_id: int, db: Session):
-    contact = contact_repo.get_contact_by_id(contact_id, user_id, db)
+def delete_contact(contact_id: int, user_id: int):
+    contact = contact_repo.get_by_id(contact_id, user_id)
     if not contact:
         raise ValueError("Contact not found")
-    contact_repo.delete_contact(contact, db)
+    contact_repo.delete(contact_id, user_id)
