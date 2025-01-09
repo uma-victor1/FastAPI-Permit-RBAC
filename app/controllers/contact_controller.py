@@ -1,12 +1,15 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Depends, status, Body, Request
 from sqlalchemy.orm import Session
 from typing import List
-
+from utils.authorization import check_permission
 from services import contact_service
 from utils.dependencies import get_user
 from db.context import get_db
 from models.dto import CreateContact, UpdateContact, GetContact
 from models.db import User
+
 
 router = APIRouter(prefix="/contacts", tags=["Contacts"])
 
@@ -17,6 +20,10 @@ async def create_contact(
     user: User = Depends(get_user),
 ):
     try:
+        await check_permission(
+            user_id=str(user.id), action="create", resource="contact"
+        )
+
         return contact_service.create_contact(user.id, contact_data)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
