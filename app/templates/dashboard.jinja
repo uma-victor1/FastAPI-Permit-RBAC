@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Contacts</title>
+    <title>Dashboard</title>
     <style>
         /* Modal styles */
         .modal {
@@ -67,8 +67,8 @@
 </head>
 
 <body>
-    <h1>Welcome, {{ user.name }}</h1>
-    <h3>Your Contacts</h3>
+    <h1>Welcome, Admin {{ user.name }}</h1>
+    <h3>All Contacts</h3>
 
     {% if contacts %}
     <table>
@@ -84,7 +84,7 @@
         <tbody>
             {% for contact in contacts %}
             <tr>
-                <td>{{ contact.name }}</td>
+                <td>{{ contact.name }} ({{contact.user_id}})</td>
                 <td>{{ contact.phone or 'N/A' }}</td>
                 <td>{{ contact.email or 'N/A' }}</td>
                 <td>{{ contact.notes or 'N/A' }}</td>
@@ -110,6 +110,9 @@
             <span class="close">&times;</span>
             <h2>Add New Contact</h2>
             <form id="addContactForm">
+                <label for="userid">User Id:</label><br>
+                <input type="number" id="userid" name="userid"><br><br>
+
                 <label for="name">Name:</label><br>
                 <input type="text" id="name" name="name" required><br><br>
 
@@ -132,6 +135,7 @@
             <span class="close" onclick="closeUpdateModal()">&times;</span>
             <h2>Update Contact</h2>
             <form id="updateContactForm">
+
                 <input type="hidden" id="updateId">
                 <label for="updateName">Name:</label>
                 <input type="text" id="updateName" name="name" required><br><br>
@@ -174,12 +178,14 @@
         };
         const form = document.getElementById('addContactForm');
         form.addEventListener('submit', async (event) => {
+
             event.preventDefault(); // Prevent default form submission
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            const userid = document.getElementById('userid').value
 
-            const response = await fetch('http://localhost:3000/contacts/', {
+            const response = await fetch(`http://localhost:3000/dashboard/${Number(userid)}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -224,7 +230,8 @@
                 notes: document.getElementById('updateNotes').value,
             };
 
-            const response = await fetch(`/contacts/${id}`, {
+
+            const response = await fetch(`/dashboard/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -246,7 +253,7 @@
                 return;
             }
 
-            const response = await fetch(`/contacts/${id}`, {
+            const response = await fetch(`/dashboard/${id}`, {
                 method: 'DELETE',
             });
 

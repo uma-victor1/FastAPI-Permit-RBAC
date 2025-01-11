@@ -46,6 +46,26 @@ def update(
         )
 
 
+def updateany(contact_id: int, name: str, phone: str, email: str, notes: str) -> None:
+    """
+    Update an existing contact's information.
+    """
+    with session_maker.begin() as session:
+        session.execute(
+            Update(Contact)
+            .where(Contact.id == contact_id)
+            .values(
+                {
+                    Contact.name: name,
+                    Contact.phone: phone,
+                    Contact.email: email,
+                    Contact.notes: notes,
+                    Contact.updated_at: current_timestamp(),
+                }
+            )
+        )
+
+
 def delete(contact_id: int, user_id: int) -> None:
     """
     Delete a contact by its ID and associated user ID.
@@ -56,6 +76,14 @@ def delete(contact_id: int, user_id: int) -> None:
                 (Contact.id == contact_id) & (Contact.user_id == user_id)
             )
         )
+
+
+def deleteany(contact_id: int) -> None:
+    """
+    Delete any contact by its ID
+    """
+    with session_maker.begin() as session:
+        session.execute(Delete(Contact).where((Contact.id == contact_id)))
 
 
 def get_contacts_by_user(
@@ -74,13 +102,17 @@ def get_contacts_by_user(
         )
 
 
-def get_by_id(contact_id: int, user_id: int) -> Contact:
+def get_by_id(contact_id: int, user_id: int = None) -> Contact:
     """
     Get a single contact by its ID and associated user ID.
     """
     with session_maker() as session:
-        return (
-            session.query(Contact)
-            .filter(Contact.id == contact_id, Contact.user_id == user_id)
-            .first()
-        )
+        return session.query(Contact).filter(Contact.id == contact_id).first()
+
+
+def get_all_contacts(limit: int = 1000, offset: int = 0) -> list[Contact]:
+    """
+    Get all contacts with optional limit and offset.
+    """
+    with session_maker() as session:
+        return session.query(Contact).limit(limit).offset(offset).all()
