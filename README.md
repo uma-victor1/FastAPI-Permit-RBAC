@@ -18,7 +18,7 @@ This project is developed using the following technologies:
 
 - **FastAPI:** A modern, fast (high-performance), web framework for building APIs with Python 3.7+.
 - **Uvicorn:** A lightning-fast ASGI server, used to run FastAPI application.
-- **PyMySQL:** A pure-Python MySQL/MariaDB client library.
+- **PostgreSQL:** A powerful, open source relational database management system.
 - **SQLAlchemy:** A SQL toolkit and Object-Relational Mapping (ORM) library for Python.
 - **Alembic:** A database migration tool for SQLAlchemy.
 
