@@ -17,6 +17,7 @@ from utils.bcrypt_hashing import HashLib
 from utils import dependencies
 from constants import COOKIES_KEY_NAME
 from constants import SESSION_TIME
+from utils.authorization import assign_role, create_role
 
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -58,19 +59,21 @@ async def register(
         user.name, user.surname, db.User.Role.USER, email, user.password
     )
     created_user_dict = created_user.to_dict()
-    print(created_user_dict)
 
     exp_date = NOW + SESSION_TIME
 
     token = jwt_service.encode(
         created_user_dict["id"], str(created_user_dict["role"]), exp_date
     )
+    await create_role(created_user_dict)
+    await assign_role(created_user_dict["id"], "viewer")
+
     res.set_cookie(
         key=COOKIES_KEY_NAME,
         value=token,
         expires=exp_date,
-        httponly=True,  # Recommended for security
-        secure=False,  # Set True in production (if using HTTPS)
+        httponly=True,
+        secure=False,
         samesite="Lax",
     )
 
